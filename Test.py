@@ -12,6 +12,7 @@ from PIL import Image
 import cv2
 import torch
 from torch.autograd import Variable
+import torchvision.transforms as transforms
 #### FOR REAL TIME COMMUNICATION BETWEEN CLIENT AND SERVER
 sio = socketio.Server()
 #### FLASK IS A MICRO WEB FRAMEWORK WRITTEN IN PYTHON
@@ -19,13 +20,14 @@ app = Flask(__name__)  # '__main__'
  
 maxSpeed = 10
  
- 
+transformations = transforms.Compose([transforms.Lambda(lambda x: (x / 255.0) - 0.5)])
+
 def preProcess(img):
     img = img[60:135,:,:]
     img = cv2.cvtColor(img, cv2.COLOR_RGB2YUV)
     # img = cv2.GaussianBlur(img,  (3, 3), 0)
     img = cv2.resize(img, (200, 66))
-    img = img/255
+    
     return img
  
  
@@ -34,7 +36,9 @@ def telemetry(sid, data):
     speed = float(data['speed'])
     image = Image.open(BytesIO(base64.b64decode(data['image'])))
     image = np.asarray(image)
+    
     image = preProcess(image)
+    image = transformations(image)
     # image = np.array([image])
     # steering = float(model.predict(image))
     image = torch.Tensor(image)
