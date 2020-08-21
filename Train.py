@@ -82,9 +82,9 @@ def augment(imgName, angle):
     return current_image, angle
 
 
-imgRe,angleRe = augment('/Users/sangyy/Documents/beta_simulator_mac/dataset/IMG/center_2020_08_19_17_58_08_199.jpg',1)
-plt.imshow(imgRe)
-plt.show()
+# imgRe,angleRe = augment('/Users/sangyy/Documents/beta_simulator_mac/dataset/IMG/center_2020_08_19_17_58_08_199.jpg',1)
+# plt.imshow(imgRe)
+# plt.show()
 
 
 class Dataset(data.Dataset):
@@ -97,12 +97,12 @@ class Dataset(data.Dataset):
         batch_samples = self.samples[index]
         steering_angle = float(batch_samples[3])
         center_img, steering_angle_center = augment(batch_samples[0], steering_angle)
-        left_img, steering_angle_left = augment(batch_samples[1], steering_angle + 0.4)
-        right_img, steering_angle_right = augment(batch_samples[2], steering_angle - 0.4)
+        # left_img, steering_angle_left = augment(batch_samples[1], steering_angle + 0.4)
+        # right_img, steering_angle_right = augment(batch_samples[2], steering_angle - 0.4)
         center_img = self.transform(center_img)
-        left_img = self.transform(left_img)
-        right_img = self.transform(right_img)
-        return (center_img, steering_angle_center), (left_img, steering_angle_left), (right_img, steering_angle_right)
+        # left_img = self.transform(left_img)
+        # right_img = self.transform(right_img)
+        return (center_img, steering_angle_center)
 
     def __len__(self):
         return len(self.samples)
@@ -168,14 +168,15 @@ for epoch in range(max_epochs):
     real_valid_loss = 0
 
     model.train()
-    for local_batch, (centers, lefts, rights) in enumerate(training_generator):
+    for local_batch, (centers) in enumerate(training_generator):
         # Transfer to GPU
-        centers, lefts, rights = toDevice(centers, device), toDevice(lefts, device), toDevice(rights, device)
+        centers = toDevice(centers, device)
 
         # Model computations
         optimizer.zero_grad()
-        datas = [centers, lefts, rights]
+        datas = [centers]
         for data in datas:
+            # print(len(data))
             imgs, angles = data
             outputs = model(imgs)
             loss = criterion(outputs, angles.unsqueeze(1))
@@ -188,13 +189,13 @@ for epoch in range(max_epochs):
     # Validation
     model.eval()
     with torch.set_grad_enabled(False):
-        for local_batch, (centers, lefts, rights) in enumerate(validation_generator):
+        for local_batch, (centers) in enumerate(validation_generator):
             # Transfer to GPU
-            centers, lefts, rights = toDevice(centers, device), toDevice(lefts, device), toDevice(rights, device)
+            centers = toDevice(centers, device)
 
             # Model computations
             optimizer.zero_grad()
-            datas = [centers, lefts, rights]
+            datas = [centers]
             for data in datas:
                 imgs, angles = data
                 outputs = model(imgs)
