@@ -125,13 +125,14 @@ def importData(path):
     print('Total Images Imported:', data.shape[0])
     return data
 
-
+"""
 
 ##### Balance the Data ##### 
 def balancedData(data,display=True):
     nBins = 31
     samplesPerBin = 1000
-    hist, bins = np.histogram(data['Steering'],nBins)
+    print(data[1])
+    hist, bins = np.histogram(data[1],nBins)
     
     if display:
         center = (bins[:-1] + bins[1:])*0.5
@@ -142,8 +143,8 @@ def balancedData(data,display=True):
     removeIndexList = []
     for j in range(nBins):
         binDataList = []
-        for i in range(len(data['Steering'])):
-            if data['Steering'][i] >= bins[j] and data['Steering'][i] <= bins[j+1]:
+        for i in range(len(data(1))):
+            if data[1][i] >= bins[j] and data[1][i] <= bins[j+1]:
                 binDataList.append(i)
         binDataList  = shuffle(binDataList)
         binDataList = binDataList[samplesPerBin:]
@@ -161,7 +162,7 @@ def balancedData(data,display=True):
     return data
 
 
-
+"""
 ##### Load the Data #####
 def loadData(path, data):
     imagesPath = []
@@ -179,7 +180,7 @@ def loadData(path, data):
 """
 
 
-
+"""
 
 ##### Image Augmentation #####
 def augmentImage(imgPath, steering):
@@ -225,7 +226,7 @@ def preProcessing(img):
 # plt.show()
 
 
-"""
+
 ##### Generating Batch #####
 def batchGen(imagesPath, steeringList, batchSize, trainFlag):
     while True:

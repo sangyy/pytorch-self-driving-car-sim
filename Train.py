@@ -2,6 +2,8 @@ print('Setting Up')
 import os
 # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import csv
+import pandas as pd
+import matplotlib.image as mpimg
 from Utils import *
 from sklearn.model_selection import train_test_split
 from torch.utils import data
@@ -20,7 +22,7 @@ parser.add_argument(
 parser.add_argument(
     '--batch_size',
     type=int,
-    default=100,
+    default=32,
     help='Number of steps to run trainer',
 )
 parser.add_argument(
@@ -37,6 +39,53 @@ parser.add_argument(
 )
 flags = parser.parse_args()
 
+
+##### Balance the Data ##### 
+def balancedSamples(samples,display=True):
+    nBins = 31
+    samplesPerBin = 1000
+    # print([x[3] for x in samples])
+    samples_angle = [float(x[3]) for x in samples]
+    samples_angle = np.asarray(samples_angle)
+    # print(b)
+    # print(a)
+    hist, bins = np.histogram(samples_angle,nBins)
+    
+    if display:
+        center = (bins[:-1] + bins[1:])*0.5
+        plt.bar(center, hist, width=0.06)
+        plt.plot((-1,1),(samplesPerBin,samplesPerBin))
+        plt.show()
+    
+    removeIndexList = []
+    for j in range(nBins):
+        binDataList = []
+        for i in range(len(samples_angle)):
+            if samples_angle[i] >= bins[j] and samples_angle[i] <= bins[j+1]:
+                binDataList.append(i)
+        binDataList  = shuffle(binDataList)
+        binDataList = binDataList[samplesPerBin:]
+        removeIndexList.extend(binDataList)
+    print('Removed Images: ', len(removeIndexList))
+    # samples.drop(samples.index[removeIndexList], inplace=True)
+    for i in sorted(removeIndexList, reverse=True):
+        del samples[i]
+
+    print('Remaining Images: ', len(samples))
+    
+    if display:
+        samples_angle = [float(x[3]) for x in samples]
+        samples_angle = np.asarray(samples_angle)
+        hist, _ = np.histogram(samples_angle, nBins)
+        plt.bar(center, hist, width=0.06)
+        plt.plot((-1,1),(samplesPerBin, samplesPerBin))
+        plt.show()
+        
+    return samples
+
+
+
+
 # Step1: Read from the log file
 samples = []
 with open('/Users/sangyy/Documents/beta_simulator_mac/dataset/driving_log.csv') as csvfile:
@@ -44,6 +93,9 @@ with open('/Users/sangyy/Documents/beta_simulator_mac/dataset/driving_log.csv') 
     next(reader, None)
     for line in reader:
         samples.append(line)
+print('Total Images Imported:', len(samples))
+samples = balancedSamples(samples,display=True)
+
 
 # Step2: Divide the data into training set and validation set
 train_len = int((1.0 - flags.validation_set_size)*len(samples))
@@ -51,15 +103,18 @@ valid_len = len(samples) - train_len
 train_samples, validation_samples = data.random_split(samples, lengths=[train_len, valid_len])
 print('Total Training Images: ', train_len)
 print('Total Validation Images: ', valid_len)
-print('Total Images: ', len(samples))
+# print('after blance Total Images: ', len(samples))
 
 # Step3a: Define the augmentation, transformation processes, parameters and dataset for dataloader
 def augment(imgName, angle):
     name = '/Users/sangyy/Documents/beta_simulator_mac/dataset/IMG/' + imgName.split('/')[-1]
-    current_image = cv2.imread(name)
+    # current_image = cv2.imread(name) #这里不要用cv2去读图片，opencv读取图片颜色顺序为BGR，这是一个大坑，和后面test文件不一致的色彩空间格式，转换要bgr2rgb
+    current_image = mpimg.imread(name)
     current_image = current_image[60:135, :, :]
     # current_image = current_image[65:-25, :, :]
     current_image = cv2.cvtColor(current_image, cv2.COLOR_RGB2YUV)
+    # current_image = cv2.cvtColor(current_image, cv2.COLOR_BGR2YUV)
+    
     current_image = cv2.GaussianBlur(current_image,(3,3),0)
     current_image = cv2.resize(current_image,(200,66))
     # current_image = cv2.resize(current_image,(320,70))
@@ -103,6 +158,7 @@ class Dataset(data.Dataset):
         batch_samples = self.samples[index]
         steering_angle = float(batch_samples[3])
         center_img, steering_angle_center = augment(batch_samples[0], steering_angle)
+        # cv2.imwrite("look.jpg",center_img)
         # left_img, steering_angle_left = augment(batch_samples[1], steering_angle + 0.4)
         # right_img, steering_angle_right = augment(batch_samples[2], steering_angle - 0.4)
         center_img = self.transform(center_img)
@@ -115,13 +171,14 @@ class Dataset(data.Dataset):
 
 
 # Step3b: Creating generator using the dataloader to parallasize the process
-transformations = transforms.Compose([transforms.Lambda(lambda x: (x / 255.0) - 0.5)])
+transformations = transforms.Compose([transforms.Lambda(lambda x: (x / 255.0))])
 
 params = {'batch_size': flags.batch_size,
           'shuffle': True,
           'num_workers': 0}
 
 training_set = Dataset(train_samples, transformations)
+# training_set = balancedData(training_set,display=True)
 training_generator = DataLoader(training_set, **params)
 
 validation_set = Dataset(validation_samples, transformations)
@@ -144,9 +201,17 @@ xTrain, xVal, yTrain,yVal = train_test_split(imagesPath,steerings, test_size=0.2
 print('Total Training Images: ', len(xTrain))
 print('Total Validation Images: ', len(xVal))
 """
-
+retrain = False
+# retrain = True
 # Step5: Define optimizer
-model = NVIDIA_NetworkDense()
+if not retrain:
+    print("new model")
+    model = NVIDIA_NetworkDense()
+else:
+    print("load model")
+    checkpoint = torch.load('model.h5', map_location=lambda storage, loc: storage)
+    model = checkpoint['model']
+
 # model = NetworkLight()
 print(model)
 
@@ -184,6 +249,7 @@ for epoch in range(max_epochs):
         for data in datas:
             # print(len(data))
             imgs, angles = data
+            
             outputs = model(imgs)
             loss = criterion(outputs, angles.unsqueeze(1))
             loss.backward()

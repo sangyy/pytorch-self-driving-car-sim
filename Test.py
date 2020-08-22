@@ -24,10 +24,12 @@ app = Flask(__name__)  # '__main__'
  
 maxSpeed = 10
  
-transformations = transforms.Compose([transforms.Lambda(lambda x: (x / 255.0) - 0.5)])
+transformations = transforms.Compose([transforms.Lambda(lambda x: (x / 255.0))])
 
 def preProcess(img):
     img = img[60:135,:,:]
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
     img = cv2.cvtColor(img, cv2.COLOR_RGB2YUV)
     img = cv2.GaussianBlur(img,  (3, 3), 0)
     img = cv2.resize(img, (200, 66))
@@ -39,11 +41,11 @@ def preProcess(img):
 
 global num
 num = 0 
-
+sw = True
  
 @sio.on('telemetry')
 def telemetry(sid, data):
-    global num
+    global num , sw 
     if data:
         speed = float(data['speed'])
         image_original = Image.open(BytesIO(base64.b64decode(data['image'])))
@@ -74,9 +76,18 @@ def telemetry(sid, data):
             num = num + 1
             # image = np.array(image)
             # image.save('{}.jpg'.format(image_filename))
-            if num%100 == 0:
-                image_original.save(image_filename)
-                # cv2.imwrite(image_filename,image)
+            if num%700 == 0:
+                img = np.asarray(image_original)
+                img = img[60:135,:,:]
+                # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                
+                img = cv2.cvtColor(img, cv2.COLOR_RGB2YUV)
+            
+                # img = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
+                
+                # img = cv2.GaussianBlur(img,  (3, 3), 0)
+                # img.save(image_filename)
+                cv2.imwrite(image_filename,img)
             # print(image_filename)
         
     else:
