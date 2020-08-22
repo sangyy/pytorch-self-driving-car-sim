@@ -53,15 +53,15 @@ class NVIDIA_NetworkDense(nn.Module):
             nn.Conv2d(48, 64, 3),
             nn.ELU(),
             nn.Conv2d(64, 64, 3),
-            nn.Dropout(0.25)
+            # nn.Dropout(0.25)
         )
         self.linear_layers = nn.Sequential(
-            nn.Linear(in_features=64 * 1 * 18, out_features=100),
+            nn.Linear(in_features=64*1*18, out_features=100),
             nn.ELU(),
             nn.Linear(in_features=100, out_features=50),
             nn.ELU(),
             nn.Linear(in_features=50, out_features=10),
-            # nn.ELU(),
+            nn.ELU(),
             nn.Linear(in_features=10, out_features=1)
         )
         

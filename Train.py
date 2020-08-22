@@ -14,13 +14,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     '--max_epochs',
     type=int,
-    default=20,
+    default=10,
     help='Number of epochs to run trainer',
 )
 parser.add_argument(
     '--batch_size',
     type=int,
-    default=32,
+    default=100,
     help='Number of steps to run trainer',
 )
 parser.add_argument(
@@ -49,6 +49,9 @@ with open('/Users/sangyy/Documents/beta_simulator_mac/dataset/driving_log.csv') 
 train_len = int((1.0 - flags.validation_set_size)*len(samples))
 valid_len = len(samples) - train_len
 train_samples, validation_samples = data.random_split(samples, lengths=[train_len, valid_len])
+print('Total Training Images: ', train_len)
+print('Total Validation Images: ', valid_len)
+print('Total Images: ', len(samples))
 
 # Step3a: Define the augmentation, transformation processes, parameters and dataset for dataloader
 def augment(imgName, angle):
@@ -57,7 +60,7 @@ def augment(imgName, angle):
     current_image = current_image[60:135, :, :]
     # current_image = current_image[65:-25, :, :]
     current_image = cv2.cvtColor(current_image, cv2.COLOR_RGB2YUV)
-    # current_image = cv2.GaussianBlur(current_image,(3,3),0)
+    current_image = cv2.GaussianBlur(current_image,(3,3),0)
     current_image = cv2.resize(current_image,(200,66))
     # current_image = cv2.resize(current_image,(320,70))
    
@@ -116,7 +119,7 @@ transformations = transforms.Compose([transforms.Lambda(lambda x: (x / 255.0) - 
 
 params = {'batch_size': flags.batch_size,
           'shuffle': True,
-          'num_workers': 4}
+          'num_workers': 0}
 
 training_set = Dataset(train_samples, transformations)
 training_generator = DataLoader(training_set, **params)
