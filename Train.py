@@ -2,7 +2,6 @@ import argparse
 from torch.utils import data
 from sklearn.model_selection import train_test_split
 from Utils import *
-import matplotlib.image as mpimg
 import pandas as pd
 import csv
 import os
@@ -160,6 +159,7 @@ class Dataset(data.Dataset):
         center_img, steering_angle_center = augment(
             batch_samples[0], steering_angle)
         # cv2.imwrite("look_dataset.jpg", center_img)
+        # mpimg.imsave("mpimg_look_dataset.jpg", center_img)
         # left_img, steering_angle_left = augment(batch_samples[1], steering_angle + 0.4)
         # right_img, steering_angle_right = augment(batch_samples[2], steering_angle - 0.4)
         center_img = self.transform(center_img)

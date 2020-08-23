@@ -12,6 +12,7 @@ import socketio
 import shutil
 import base64
 import os
+import matplotlib.image as mpimg
 print('Setting UP')
 
 # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -86,7 +87,8 @@ def telemetry(sid, data):
                 # img = cv2.GaussianBlur(img,  (3, 3), 0)
                 # img.save(image_filename)
                 img = preProcess(img)
-                cv2.imwrite(image_filename, img)
+                # cv2.imwrite(image_filename, img)
+                mpimg.imsave(image_filename, img)
             # print(image_filename)
 
     else:
