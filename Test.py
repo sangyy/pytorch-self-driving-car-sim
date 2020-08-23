@@ -110,7 +110,7 @@ def sendControl(steering, throttle):
 
 
 if __name__ == '__main__':
-    record_folder = '/Users/sangyy/Documents/beta_simulator_mac/dataset/testDriveRecord'
+    # record_folder = '/Users/sangyy/Documents/beta_simulator_mac/dataset/testDriveRecord'
     # model = torch.load('model.h5')
     checkpoint = torch.load(
         'model.h5', map_location=lambda storage, loc: storage)
