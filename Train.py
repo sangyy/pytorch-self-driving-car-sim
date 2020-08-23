@@ -83,7 +83,8 @@ def balancedSamples(samples, display=True):
 
 # Step1: Read from the log file
 samples = []
-with open('/Users/sangyy/Documents/beta_simulator_mac/dataset/driving_log.csv') as csvfile:
+with open('C:/Users/bj109/Documents/dataset/driving_log.csv') as csvfile:
+# with open('/Users/sangyy/Documents/beta_simulator_mac/dataset/driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
     next(reader, None)
     for line in reader:
@@ -105,18 +106,19 @@ print('Total Validation Images: ', valid_len)
 
 
 def augment(imgName, angle):
-    name = '/Users/sangyy/Documents/beta_simulator_mac/dataset/IMG/' + \
-        imgName.split('/')[-1]
+    # name = '/Users/sangyy/Documents/beta_simulator_mac/dataset/IMG/' + imgName.split('/')[-1]
+    name = 'C:/Users/bj109/Documents/dataset/IMG/' + imgName.split('/')[-1]
+
     # current_image = cv2.imread(name) #这里不要用cv2去读图片，opencv读取图片颜色顺序为BGR，这是一个大坑，和后面test文件不一致的色彩空间格式，转换要bgr2rgb
     current_image = mpimg.imread(name)
-    current_image = current_image[60:135, :, :]
-    # current_image = current_image[65:-25, :, :]
+    # current_image = current_image[60:135, :, :]
+    current_image = current_image[65:-25, :, :]
     current_image = cv2.cvtColor(current_image, cv2.COLOR_RGB2YUV)
     # current_image = cv2.cvtColor(current_image, cv2.COLOR_BGR2YUV)
 
     current_image = cv2.GaussianBlur(current_image, (3, 3), 0)
-    current_image = cv2.resize(current_image, (200, 66))
-    # current_image = cv2.resize(current_image,(320,70))
+    # current_image = cv2.resize(current_image, (200, 66))
+    current_image = cv2.resize(current_image,(320,70))
 
     # flip
     if np.random.rand() < 0.5:
@@ -205,7 +207,8 @@ retrain = False
 # Step5: Define optimizer
 if not retrain:
     print("new model")
-    model = NVIDIA_NetworkDense()
+    # model = NVIDIA_NetworkDense()
+    model = NetworkLight()
 else:
     print("load model")
     checkpoint = torch.load(
