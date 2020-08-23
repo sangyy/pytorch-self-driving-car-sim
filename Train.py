@@ -90,7 +90,7 @@ with open('/Users/sangyy/Documents/beta_simulator_mac/dataset/driving_log.csv') 
     for line in reader:
         samples.append(line)
 print('Total Images Imported:', len(samples))
-# samples = balancedSamples(samples, display=True)
+samples = balancedSamples(samples, display=True)
 
 
 # Step2: Divide the data into training set and validation set
