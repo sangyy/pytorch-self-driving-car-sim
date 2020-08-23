@@ -14,13 +14,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     '--max_epochs',
     type=int,
-    default=10,
+    default=300,
     help='Number of epochs to run trainer',
 )
 parser.add_argument(
     '--batch_size',
     type=int,
-    default=32,
+    default=100,
     help='Number of steps to run trainer',
 )
 parser.add_argument(
