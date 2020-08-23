@@ -246,16 +246,16 @@ for epoch in range(max_epochs):
 
         # Model computations
         optimizer.zero_grad()
-        datas = [centers]
-        for data in datas:
-            # print(len(data))
-            imgs, angles = data
+        # datas = [centers]
+        # for data in datas:
+        # print(len(data))
+        imgs, angles = centers
 
-            outputs = model(imgs)
-            loss = criterion(outputs, angles.unsqueeze(1))
-            loss.backward()
-            optimizer.step()
-            train_loss += loss.data
+        outputs = model(imgs)
+        loss = criterion(outputs, angles.unsqueeze(1))
+        loss.backward()
+        optimizer.step()
+        train_loss += loss.data
 
         real_train_loss = train_loss / (local_batch + 1)
 
@@ -268,12 +268,12 @@ for epoch in range(max_epochs):
 
             # Model computations
             optimizer.zero_grad()
-            datas = [centers]
-            for data in datas:
-                imgs, angles = data
-                outputs = model(imgs)
-                loss = criterion(outputs, angles.unsqueeze(1))
-                valid_loss += loss.data
+            # datas = [centers]
+            # for data in datas:
+            imgs, angles = centers
+            outputs = model(imgs)
+            loss = criterion(outputs, angles.unsqueeze(1))
+            valid_loss += loss.data
 
             real_valid_loss = valid_loss / (local_batch + 1)
 
