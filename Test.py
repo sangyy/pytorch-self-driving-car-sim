@@ -30,14 +30,14 @@ transformations = transforms.Compose(
 
 def preProcess(img):
 
-    # img = img[60:135, :, :]
-    img = img[65:-25, :, :]
+    img = img[60:135, :, :]
+    # img = img[65:-25, :, :]
     # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     # img = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
     img = cv2.cvtColor(img, cv2.COLOR_RGB2YUV)
     img = cv2.GaussianBlur(img,  (3, 3), 0)
-    # img = cv2.resize(img, (200, 66))
-    img = cv2.resize(img, (320, 70))
+    img = cv2.resize(img, (200, 66))
+    # img = cv2.resize(img, (320, 70))
 
     return img
 
@@ -62,8 +62,8 @@ def telemetry(sid, data):
         # steering = float(model.predict(image))
 
         # print(image.shape)
-        # image = image.view(1, 3, 66, 200)
-        image = image.view(1, 3, 70, 320)
+        image = image.view(1, 3, 66, 200)
+        # image = image.view(1, 3, 70, 320)
 
         image = Variable(image)
         # print(image.shape)
