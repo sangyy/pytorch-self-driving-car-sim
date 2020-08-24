@@ -22,7 +22,7 @@ sio = socketio.Server()
 # FLASK IS A MICRO WEB FRAMEWORK WRITTEN IN PYTHON
 app = Flask(__name__)  # '__main__'
 
-maxSpeed = 10
+maxSpeed = 30
 
 transformations = transforms.Compose(
     [transforms.Lambda(lambda x: (x / 255.0))])
